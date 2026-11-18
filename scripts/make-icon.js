@@ -17,19 +17,19 @@ function svg() {
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eee6bd"/><stop offset=".5" stop-color="#d6cca0"/><stop offset="1" stop-color="#c2b788"/></linearGradient>
-    <linearGradient id="lcd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a3afb9"/><stop offset="1" stop-color="#bac5cc"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efebde"/><stop offset=".5" stop-color="#e4dfcc"/><stop offset="1" stop-color="#d8d2bc"/></linearGradient>
+    <linearGradient id="lcd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8c0b4"/><stop offset="1" stop-color="#c5ccc0"/></linearGradient>
     <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34343a"/><stop offset="1" stop-color="#121214"/></linearGradient>
   </defs>
   <rect x="16" y="64" width="480" height="384" rx="40" fill="url(#body)" stroke="#000" stroke-width="4"/>
   <rect x="40" y="86" width="432" height="112" rx="10" fill="url(#gold)"/>
-  <rect x="72" y="104" width="250" height="74" rx="8" fill="#c6c791"/>
+  <rect x="72" y="104" width="250" height="74" rx="8" fill="#dc9a52"/>
   <rect x="78" y="110" width="238" height="62" rx="5" fill="url(#lcd)"/>
-  <text x="304" y="162" text-anchor="end" font-family="Consolas, monospace" font-weight="700" font-size="52" font-style="italic" fill="#27384f">12,00</text>
+  <text x="304" y="162" text-anchor="end" font-family="Consolas, monospace" font-weight="700" font-size="52" font-style="italic" fill="#2a2a2a">12,00</text>
   <rect x="396" y="108" width="56" height="64" rx="6" fill="#1b1912" stroke="#7a6c42" stroke-width="3"/>
   <rect x="402" y="114" width="44" height="34" rx="5" fill="#cdbd7a"/>
   <text x="424" y="140" text-anchor="middle" font-family="Georgia, serif" font-weight="900" font-style="italic" font-size="26" fill="#2b2410">hp</text>
-  <rect x="58" y="214" width="396" height="214" rx="12" fill="#0b0b0c" stroke="#86733f" stroke-width="3"/>
+  <rect x="58" y="214" width="396" height="214" rx="12" fill="#0d0d0d" stroke="#8f8668" stroke-width="3"/>
   ${keys.join('\n  ')}
   <rect x="396" y="232" width="52" height="172" rx="8" fill="#2b2b2f" stroke="#050506" stroke-width="3"/>
   <rect x="400" y="236" width="44" height="6" rx="3" fill="#ffffff" opacity=".13"/>

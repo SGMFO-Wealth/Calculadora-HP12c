@@ -1,0 +1,40 @@
+name: Release
+
+# Ao enviar uma tag como v1.0.0, compila os executáveis do Windows e publica na página de Releases.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx electron-builder --win --publish never
+      - name: Listar arquivos gerados
+        shell: bash
+        run: ls -la dist
+      - name: Publicar Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/Calculadora-12C-Setup-*.exe
+            dist/Calculadora-12C-portatil.exe
+          generate_release_notes: true
+          body: |
+            ## Calculadora 12C para Windows
+            - **Calculadora-12C-Setup-*.exe**: instalador.
+            - **Calculadora-12C-portatil.exe**: versão portátil, sem instalar (a primeira abertura demora cerca de 20 segundos, pois o programa se descompacta sozinho).
+
+            O Windows pode avisar "aplicativo não reconhecido" porque o programa não tem assinatura digital: clique em "Mais informações" e depois em "Executar assim mesmo". Aperte **F1** dentro do app para ver o guia de teclas.

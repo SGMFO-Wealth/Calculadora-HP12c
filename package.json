@@ -4,9 +4,11 @@
   "version": "1.0.0",
   "description": "Réplica de estudo da calculadora financeira HP 12C, com programação",
   "main": "main.js",
-  "author": "Contribuidores da Calculadora 12C",
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/SGMFO-Wealth/Calculadora-HP12c.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SGMFO-Wealth/Calculadora-HP12c.git"
+  },
   "homepage": "https://github.com/SGMFO-Wealth/Calculadora-HP12c#readme",
   "private": true,
   "scripts": {
@@ -46,6 +48,7 @@
       "signExecutable": false
     },
     "nsis": {
+      "artifactName": "Calculadora-12C-Setup-${version}.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
@@ -53,10 +56,13 @@
     },
     "portable": {
       "artifactName": "Calculadora-12C-portatil.exe"
-    }
+    },
+    "copyright": "Licença MIT",
+    "afterPack": "scripts/after-pack.js"
   },
   "devDependencies": {
     "electron": "^45.3.4",
-    "electron-builder": "^26.18.0"
+    "electron-builder": "^26.18.0",
+    "rcedit": "^5.0.2"
   }
 }
