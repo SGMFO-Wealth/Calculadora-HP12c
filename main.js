@@ -63,7 +63,7 @@ function buildMenu() {
       { label: 'Atalhos do teclado', accelerator: 'F2', click: () => send('hp:menu', 'shortcuts') },
       { type: 'separator' },
       { label: 'Sobre', click: () => dialog.showMessageBox(win, { type: 'info', title: 'Sobre', message: 'Calculadora financeira 12C',
-        detail: 'Versão ' + app.getVersion() + '\nRéplica de estudo da calculadora financeira HP 12C, com programação.\nSem vínculo com a Hewlett-Packard.\nFonte do visor: DSEG7 (SIL OFL 1.1).' }) }
+        detail: 'Versão ' + app.getVersion() + '\nRéplica de estudo da calculadora financeira HP 12C, com programação.\nAutor: Yaman Alencar\nhttps://github.com/yaman-alencar/Calculadora-HP12c\nSem vínculo com a Hewlett-Packard.\nFonte do visor: DSEG7 (SIL OFL 1.1).' }) }
     ] }
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(t));

@@ -15,7 +15,7 @@ Réplica de estudo da calculadora financeira HP 12C para Windows (Electron). Fun
 - Guia completo no próprio app (**F1**) e tela de atalhos do teclado com mini-teclado (**F2** ou **?**), onde dá para **personalizar** cada atalho
 
 ## Baixar
-Na página de [Releases](../../releases) há o instalador e a versão portátil (sem instalar). O Windows pode avisar "aplicativo não reconhecido" porque o programa não tem assinatura digital: use "Mais informações" → "Executar assim mesmo".
+Na página de [Releases](https://github.com/yaman-alencar/Calculadora-HP12c/releases) há o instalador e a versão portátil (sem instalar). O Windows pode avisar "aplicativo não reconhecido" porque o programa não tem assinatura digital: use "Mais informações" → "Executar assim mesmo".
 
 ## Desenvolver
 ```bash
@@ -35,6 +35,9 @@ npx electron scripts/make-icon.js         # regenera build/icon.png
 
 ## Fidelidade
 Os resultados seguem as convenções documentadas da HP 12C, mas o projeto foi feito sem uma calculadora física para comparação. Alguns detalhes podem diferir do aparelho real: a ordem de certos resultados na pilha (PRICE, INT), o número de casas da notação científica e os códigos de algumas mensagens de erro. Correções com exemplos do aparelho real são muito bem-vindas (abra uma issue).
+
+## Autor
+**Yaman Alencar** ([@yaman-alencar](https://github.com/yaman-alencar)). Contribuições e sugestões são bem-vindas pelas [issues](https://github.com/yaman-alencar/Calculadora-HP12c/issues).
 
 ## Aviso legal
 Projeto independente e educacional, **sem vínculo, patrocínio ou endosso da Hewlett-Packard / HP Inc.** "HP" e "HP 12C" são marcas de seus respectivos titulares. A aparência do aparelho é reproduzida apenas como referência visual de estudo; se você for redistribuir o app, considere trocar o logotipo e o texto da faixa inferior.
