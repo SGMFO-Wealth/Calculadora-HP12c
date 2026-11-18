@@ -100,9 +100,40 @@
   }
 
   // ---------- entrada: teclado ----------
-  const KMAP = { ',': '.', '.': '.', Enter: 'ENTER', '+': 'add', '-': 'sub', '*': 'mul', '/': 'div', Delete: 'CLx', ' ': 'RS', ArrowRight: 'SST', ArrowDown: 'Rd',
-    n: 'n', i: 'i', p: 'PV', m: 'PMT', v: 'FV', h: 'CHS', e: 'EEX', y: 'yx', q: 'inv', t: 'pT', d: 'dP', '%': 'pc', x: 'xy', s: 'STO', r: 'RCL', z: 'sum', f: 'f', g: 'g', o: 'ON' };
-  for (let d = 0; d <= 9; d++) KMAP[String(d)] = String(d);
+  // atalhos do teclado: cada tecla da calculadora tem uma lista de teclas do computador (personalizável)
+  const DEFAULT_BIND = { n: ['n'], i: ['i'], PV: ['p'], PMT: ['m'], FV: ['v'], CHS: ['h'], 7: ['7'], 8: ['8'], 9: ['9'], div: ['/'],
+    yx: ['y'], inv: ['q'], pT: ['t'], dP: ['d'], pc: ['%'], EEX: ['e'], 4: ['4'], 5: ['5'], 6: ['6'], mul: ['*'],
+    RS: [' '], SST: ['ArrowRight'], Rd: ['ArrowDown'], xy: ['x'], CLx: ['Delete'], ENTER: ['Enter'], 1: ['1'], 2: ['2'], 3: ['3'], sub: ['-'],
+    ON: ['o'], f: ['f'], g: ['g'], STO: ['s'], RCL: ['r'], 0: ['0'], '.': [',', '.'], sum: ['z'], add: ['+'] };
+  // teclas que não podem ser atribuídas (têm função fixa no app ou são modificadoras)
+  const RESERVED = new Set(['Escape', 'Backspace', 'ArrowLeft', 'F1', 'F2', '?', 'Tab', 'Shift', 'Control', 'Alt', 'Meta', 'AltGraph', 'CapsLock', 'NumLock', 'ScrollLock',
+    'ContextMenu', 'Dead', 'Process', 'Unidentified', 'OS', 'PageUp', 'PageDown', 'Home', 'End', 'Insert']);
+  let bindings = {}, KEYIDX = {};
+  function rebuildIdx() { KEYIDX = {}; Object.keys(bindings).forEach(id => bindings[id].forEach(k => { KEYIDX[k] = id; })); }
+  function loadBindings() {
+    bindings = JSON.parse(JSON.stringify(DEFAULT_BIND));
+    try {
+      const o = JSON.parse(localStorage.getItem('hp12c.keymap') || '{}');
+      Object.keys(o).forEach(id => { if (id in bindings && Array.isArray(o[id])) bindings[id] = o[id].filter(k => typeof k === 'string' && k.length > 0 && k.length <= 16 && !RESERVED.has(k)); });
+    } catch (_) { /* usa os padrões */ }
+    rebuildIdx();
+  }
+  function saveBindings() {
+    const o = {};
+    Object.keys(bindings).forEach(id => { if (JSON.stringify(bindings[id]) !== JSON.stringify(DEFAULT_BIND[id])) o[id] = bindings[id]; });
+    try { if (Object.keys(o).length) localStorage.setItem('hp12c.keymap', JSON.stringify(o)); else localStorage.removeItem('hp12c.keymap'); } catch (_) { /* sem armazenamento */ }
+  }
+  const KEYNAME = { ' ': 'Espaço', Enter: 'Enter', Delete: 'Del', ArrowRight: '→', ArrowLeft: '←', ArrowDown: '↓', ArrowUp: '↑' };
+  const HINTNAME = { ' ': '␣', Enter: '↵', Delete: 'Del', ArrowRight: '→', ArrowLeft: '←', ArrowDown: '↓', ArrowUp: '↑' };
+  const keyName = k => KEYNAME[k] || k;
+  const scText = id => (bindings[id] && bindings[id].length) ? keyName(bindings[id][0]) : '';
+  function updateHints() {
+    document.querySelectorAll('.c12-k').forEach(b => {
+      const a = bindings[b.dataset.k]; const t = a && a.length ? (HINTNAME[a[0]] || a[0]) : '';
+      if (t) b.setAttribute('data-sc', t); else b.removeAttribute('data-sc');
+    });
+  }
+  const calcLabel = id => { const k = KEYS.find(x => x && x[0] === id); return k ? k[1].replace(/<[^>]+>/g, '') : id; };
   const heldKeys = new Map();
   /** ← (g ←): apaga o último dígito; com erro/prefixo pendente só limpa o estado */
   function backspace() {
@@ -115,6 +146,7 @@
   }
   function bindKeyboard() {
     window.addEventListener('keydown', e => {
+      if (capId) { e.preventDefault(); handleCapture(e); return; }
       if (e.key === 'F2' || (e.key === '?' && !e.ctrlKey && !e.altKey && !e.metaKey)) {
         e.preventDefault(); if (sheetMode === 'shortcuts') hideHelp(); else showShortcuts(); return;
       }
@@ -132,8 +164,7 @@
         e.preventDefault(); if (eng.err || eng.off || eng.running) { eng.press('CLx'); return; }
         eng.buf = []; eng.press('g'); eng.keyDown('SST'); heldKeys.set('ArrowLeft', 'SST'); flash('SST', true); return;
       }
-      let id = KMAP[e.key];
-      if (!id && e.key.length === 1) id = KMAP[e.key.toLowerCase()];
+      const id = KEYIDX[e.key.length === 1 ? e.key.toLowerCase() : e.key];
       if (!id) return;
       e.preventDefault(); heldKeys.set(e.key, id); flash(id, true); eng.keyDown(id);
     });
@@ -173,7 +204,8 @@
   const HELP = `
 <h1>Calculadora financeira 12C</h1>
 <p>Réplica funcional da HP 12C: pilha RPN de 4 níveis, funções financeiras, datas, estatística e programação de até 99 linhas. Letras <span class="fl">laranja</span> = tecla <b>f</b> antes; letras <span class="gl">azuis</span> = tecla <b>g</b> antes.</p>
-<h2>Teclado do computador</h2>
+<h2>Teclado do computador (padrão)</h2>
+<p>Esta tabela mostra os atalhos de fábrica. Para ver ou mudar os seus, abra a tela de atalhos (<kbd>F2</kbd>) e use <b>Personalizar atalhos</b>.</p>
 <table><tr><th>Tecla</th><th>Função</th><th>Tecla</th><th>Função</th></tr>
 <tr><td><kbd>0</kbd>–<kbd>9</kbd> <kbd>,</kbd> <kbd>.</kbd></td><td>dígitos e ponto decimal</td><td><kbd>Enter</kbd></td><td>ENTER</td></tr>
 <tr><td><kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd></td><td>operações</td><td><kbd>Backspace</kbd></td><td>← (apaga o último dígito)</td></tr>
@@ -209,8 +241,7 @@
 <tr><td>Error 8</td><td>data inválida (1582–4046)</td><td colspan="2">Qualquer tecla apaga a mensagem.</td></tr></table>
 <p style="color:#9a9684;margin-top:14px">Aplicativo independente de estudo, sem vínculo com a Hewlett-Packard. Os resultados seguem as convenções documentadas da HP 12C, mas arredondamentos internos podem diferir na última casa.</p>`;
   // ---------- folha de atalhos do teclado ----------
-  const SC_NAME = { '␣': 'Espaço', '↵': 'Enter', 'Del': 'Del' };
-  let sheetMode = null, hintsOn = false;
+  let sheetMode = null, hintsOn = false, editMode = false, capId = null;
   function shortcutsHtml() {
     let g = '<div class="kbmap">';
     KEYS.forEach((k, idx) => {
@@ -218,11 +249,18 @@
       const r = Math.floor(idx / 10), c = idx % 10 + 1;
       const gr = k[0] === 'ENTER' ? (r + 1) + ' / span 2' : (r + 1);
       const cls = k[0] === 'f' ? ' kbf' : (k[0] === 'g' ? ' kbg' : '');
-      g += '<div class="kb' + cls + '" style="grid-row:' + gr + ';grid-column:' + c + '"><span class="kbl">' + k[1] + '</span><kbd>' + (SC_NAME[k[4]] || k[4]) + '</kbd></div>';
+      const sel = capId === k[0] ? ' sel' : '';
+      g += '<div class="kb' + cls + sel + '" data-id="' + k[0] + '" style="grid-row:' + gr + ';grid-column:' + c + '"><span class="kbl">' + k[1] + '</span><kbd>' + (scText(k[0]) ? keyName(bindings[k[0]][0]) : '—') + '</kbd></div>';
     });
     g += '</div>';
+    const edit = editMode
+      ? '<div class="capture">' + (capId
+        ? 'Pressione a nova tecla do computador para <b>' + calcLabel(capId) + '</b>. <span class="muted">Esc cancela.</span> <button class="btn" data-act="unbind">Remover atalho</button> <button class="btn" data-act="cancel-cap">Cancelar</button>'
+        : 'Clique numa tecla da calculadora abaixo e depois aperte a tecla do computador que você quer usar.') + '</div>'
+      : '';
     return '<h1>Atalhos do teclado</h1>' +
-      '<p>Cada tecla da calculadora (em cima) e a tecla do computador que a aciona (embaixo). Funciona com o teclado numérico também.</p>' + g +
+      '<p>Cada tecla da calculadora (em cima) e a tecla do computador que a aciona (embaixo). Funciona com o teclado numérico também.</p>' + edit +
+      '<div class="' + (editMode ? 'editing' : '') + '">' + g + '</div>' +
       '<h2>Funções em laranja e azul</h2>' +
       '<p>Pressione <kbd>f</kbd> ou <kbd>g</kbd> e depois a tecla. Exemplos: <kbd>f</kbd> <kbd>n</kbd> = AMORT, <kbd>g</kbd> <kbd>n</kbd> = 12×, <kbd>g</kbd> <kbd>7</kbd> = BEG, <kbd>f</kbd> <kbd>2</kbd> = duas casas decimais. <kbd>STO</kbd> e <kbd>RCL</kbd> (<kbd>s</kbd>, <kbd>r</kbd>) esperam o número do registrador.</p>' +
       '<h2>Outros atalhos</h2>' +
@@ -234,8 +272,12 @@
       '<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>exporta / importa um programa</td></tr>' +
       '<tr><td><kbd>F1</kbd></td><td>guia completo da calculadora</td></tr>' +
       '<tr><td><kbd>F2</kbd> ou <kbd>?</kbd></td><td>abre ou fecha esta tela</td></tr></table>' +
-      '<p style="margin-top:14px"><button class="btn" data-act="hints">' + (hintsOn ? 'Ocultar' : 'Mostrar') + ' as letras nas teclas da calculadora</button>' +
-      '<button class="btn" data-act="guide">Guia completo (F1)</button></p>';
+      (editMode
+        ? '<p class="muted">Teclas reservadas, que não podem ser trocadas: <kbd>Esc</kbd>, <kbd>Backspace</kbd>, <kbd>←</kbd>, <kbd>F1</kbd>, <kbd>F2</kbd> e <kbd>?</kbd>. Se a tecla já estiver em uso, ela passa para a nova função e a antiga fica sem atalho. As escolhas ficam salvas neste computador.</p>' +
+          '<p style="margin-top:14px"><button class="btn" data-act="done">Concluir</button><button class="btn" data-act="reset-keys">Restaurar padrão</button></p>'
+        : '<p style="margin-top:14px"><button class="btn" data-act="edit">Personalizar atalhos</button>' +
+          '<button class="btn" data-act="hints">' + (hintsOn ? 'Ocultar' : 'Mostrar') + ' as letras nas teclas da calculadora</button>' +
+          '<button class="btn" data-act="guide">Guia completo (F1)</button></p>');
   }
   function openSheet(html, mode) {
     sheetMode = mode; $('helpBody').innerHTML = html; $('help').classList.remove('hidden'); $('helpBody').parentElement.scrollTop = 0;
@@ -244,9 +286,28 @@
     openSheet('<p><button class="btn" data-act="shortcuts">Ver só os atalhos do teclado (F2)</button></p>' + HELP, 'guide');
   }
   function showShortcuts() { openSheet(shortcutsHtml(), 'shortcuts'); }
-  function hideHelp() { $('help').classList.add('hidden'); sheetMode = null; }
+  function hideHelp() { $('help').classList.add('hidden'); sheetMode = null; editMode = false; capId = null; }
+  function handleCapture(e) {
+    if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(e.key)) return;
+    if (e.key === 'Escape') { capId = null; showShortcuts(); return; }
+    if (e.ctrlKey || e.altKey || e.metaKey) { toast('Use uma tecla sozinha (sem Ctrl, Alt ou Windows)'); return; }
+    if (RESERVED.has(e.key)) { toast('A tecla ' + keyName(e.key) + ' é reservada. Escolha outra.'); return; }
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    const owner = KEYIDX[k];
+    if (owner && owner !== capId) {
+      bindings[owner] = bindings[owner].filter(x => x !== k);
+      toast('A tecla ' + keyName(k) + ' estava em ' + calcLabel(owner) + ', que ficou sem atalho.');
+    }
+    bindings[capId] = [k]; rebuildIdx(); saveBindings(); updateHints();
+    capId = null; showShortcuts();
+  }
   function sheetAction(act) {
-    if (act === 'shortcuts') showShortcuts();
+    if (act === 'edit') { editMode = true; capId = null; showShortcuts(); }
+    else if (act === 'done') { editMode = false; capId = null; showShortcuts(); }
+    else if (act === 'cancel-cap') { capId = null; showShortcuts(); }
+    else if (act === 'unbind') { if (capId) { bindings[capId] = []; rebuildIdx(); saveBindings(); updateHints(); } capId = null; showShortcuts(); toast('Atalho removido'); }
+    else if (act === 'reset-keys') { bindings = JSON.parse(JSON.stringify(DEFAULT_BIND)); rebuildIdx(); saveBindings(); updateHints(); capId = null; showShortcuts(); toast('Atalhos restaurados para o padrão'); }
+    else if (act === 'shortcuts') showShortcuts();
     else if (act === 'guide') showHelp();
     else if (act === 'hints') {
       if (api && api.setSetting) api.setSetting('hints', !hintsOn);
@@ -294,10 +355,14 @@
   }
 
   function init() {
-    build(); load(); bindPointer(); bindKeyboard();
+    build(); loadBindings(); updateHints(); load(); bindPointer(); bindKeyboard();
     eng.on(render);
     $('helpClose').addEventListener('click', hideHelp);
-    $('helpBody').addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b) sheetAction(b.dataset.act); });
+    $('helpBody').addEventListener('click', e => {
+      const b = e.target.closest('[data-act]'); if (b) { sheetAction(b.dataset.act); return; }
+      const cell = e.target.closest('.kb[data-id]');
+      if (cell && editMode) { capId = cell.dataset.id; showShortcuts(); }
+    });
     $('kbdBtn').addEventListener('click', showShortcuts);
     $('help').addEventListener('pointerdown', e => { if (e.target === $('help')) hideHelp(); });
     window.addEventListener('resize', fit);

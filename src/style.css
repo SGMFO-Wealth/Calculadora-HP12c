@@ -90,3 +90,9 @@ body{background:radial-gradient(ellipse at 50% 35%,#2f3238 0%,#1b1d21 70%);color
 .fab{position:fixed;right:10px;bottom:10px;width:30px;height:30px;border-radius:8px;border:1px solid #3a3e48;background:rgba(30,32,38,.85);color:#d9d4c0;font-size:17px;line-height:1;cursor:pointer;opacity:.45;z-index:20;padding:0}
 .fab:hover,.fab:focus-visible{opacity:1;border-color:#e8a12a}
 @media (max-width:640px){.kb{min-height:44px}.kb .kbl,.kb kbd{font-size:10px}}
+.sheet .muted,.muted{color:#9a9684;font-size:12.5px}
+.capture{background:#1f2128;border:1px dashed #e8a12a;border-radius:8px;padding:9px 12px;margin:8px 0;font-size:13.5px}
+.capture .btn{margin:6px 8px 0 0}
+.editing .kb{cursor:pointer}
+.editing .kb:hover{border-color:#e8a12a}
+.kb.sel{outline:2px solid #e8a12a;background:#3a2c12}

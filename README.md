@@ -12,7 +12,7 @@ Réplica de estudo da calculadora financeira HP 12C para Windows (Electron). Fun
 - Datas (DATE, ΔDYS, D.MY/M.DY), estatística (Σ+, x̄, s, regressão linear, média ponderada)
 - **Programação de até 99 linhas**: gravação por códigos de tecla, GTO, testes x≤y e x=0, R/S, SST/BST, PSE, memória compartilhada com os registradores
 - Teclado do computador, copiar/colar números, exportar/importar programas, separador decimal à escolha
-- Guia completo no próprio app (**F1**) e tela de atalhos do teclado com mini-teclado (**F2** ou **?**)
+- Guia completo no próprio app (**F1**) e tela de atalhos do teclado com mini-teclado (**F2** ou **?**), onde dá para **personalizar** cada atalho
 
 ## Baixar
 Na página de [Releases](../../releases) há o instalador e a versão portátil (sem instalar). O Windows pode avisar "aplicativo não reconhecido" porque o programa não tem assinatura digital: use "Mais informações" → "Executar assim mesmo".
