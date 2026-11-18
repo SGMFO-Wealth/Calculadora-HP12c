@@ -1,7 +1,7 @@
 {
   "name": "calculadora-12c",
   "productName": "Calculadora 12C",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Réplica de estudo da calculadora financeira HP 12C, com programação",
   "main": "main.js",
   "license": "MIT",
