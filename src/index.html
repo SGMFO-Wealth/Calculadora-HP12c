@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; script-src 'self'">
+<title>Calculadora Financeira 12C</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+  <div class="calc12" id="calc" tabindex="-1" aria-label="Calculadora financeira"></div>
+  <div class="regs hidden" id="regs" aria-label="Pilha e registradores"></div>
+</div>
+<div class="overlay hidden" id="help" role="dialog" aria-modal="true" aria-label="Guia da calculadora">
+  <div class="sheet">
+    <button class="close" id="helpClose" aria-label="Fechar">×</button>
+    <div id="helpBody"></div>
+  </div>
+</div>
+<div class="toast hidden" id="toast" role="status"></div>
+<script src="engine.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>

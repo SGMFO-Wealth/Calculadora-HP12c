@@ -1,0 +1,4 @@
+Fonte DSEG7 Classic (digitos de 7 segmentos do visor)
+Copyright (c) 2020, keshikan (http://www.keshikan.net), com o nome reservado "DSEG".
+Licenciada sob a SIL Open Font License, Version 1.1 - https://openfontlicense.org
+Projeto: https://github.com/keshikan/DSEG

@@ -1,0 +1,62 @@
+{
+  "name": "calculadora-12c",
+  "productName": "Calculadora 12C",
+  "version": "1.0.0",
+  "description": "Réplica de estudo da calculadora financeira HP 12C, com programação",
+  "main": "main.js",
+  "author": "Contribuidores da Calculadora 12C",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/SGMFO-Wealth/Calculadora-HP12c.git" },
+  "homepage": "https://github.com/SGMFO-Wealth/Calculadora-HP12c#readme",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/engine.test.js",
+    "dist": "electron-builder --win"
+  },
+  "build": {
+    "appId": "app.calculadora12c.desktop",
+    "productName": "Calculadora 12C",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "language": "1046"
+    },
+    "portable": {
+      "artifactName": "Calculadora-12C-portatil.exe"
+    }
+  },
+  "devDependencies": {
+    "electron": "^45.3.4",
+    "electron-builder": "^26.18.0"
+  }
+}
