@@ -38,3 +38,10 @@ jobs:
             - **Calculadora-12C-portatil.exe**: versão portátil, sem instalar (a primeira abertura demora cerca de 20 segundos, pois o programa se descompacta sozinho).
 
             O Windows pode avisar "aplicativo não reconhecido" porque o programa não tem assinatura digital: clique em "Mais informações" e depois em "Executar assim mesmo". Aperte **F1** dentro do app para ver o guia de teclas.
+      # Passo único: remove a Release antiga (v1.0.0, feita com outro visual) depois que a nova for publicada.
+      - name: Remover Release antiga v1.0.0
+        if: github.ref_name == 'v1.0.1'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release delete v1.0.0 --cleanup-tag --yes --repo "${{ github.repository }}" || echo "v1.0.0 já não existe"
