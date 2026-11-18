@@ -2,6 +2,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('hp12c', {
   ready: () => ipcRenderer.send('hp:ready'),
+  setSetting: (key, value) => ipcRenderer.send('hp:set-setting', key, value),
   onSettings: cb => ipcRenderer.on('hp:settings', (_e, s) => cb(s)),
   onMenu: cb => ipcRenderer.on('hp:menu', (_e, cmd, arg) => cb(cmd, arg)),
   saveFile: (name, content) => ipcRenderer.invoke('hp:save-file', name, content),

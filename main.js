@@ -59,7 +59,8 @@ function buildMenu() {
       { label: 'Ponto  (1,234.56)', type: 'radio', checked: !settings.comma, click: () => { settings.comma = false; saveSettings(); pushSettings(); } }
     ] },
     { label: 'A&juda', submenu: [
-      { label: 'Guia da calculadora e atalhos', accelerator: 'F1', click: () => send('hp:menu', 'help') },
+      { label: 'Guia da calculadora', accelerator: 'F1', click: () => send('hp:menu', 'help') },
+      { label: 'Atalhos do teclado', accelerator: 'F2', click: () => send('hp:menu', 'shortcuts') },
       { type: 'separator' },
       { label: 'Sobre', click: () => dialog.showMessageBox(win, { type: 'info', title: 'Sobre', message: 'Calculadora financeira 12C',
         detail: 'Versão ' + app.getVersion() + '\nRéplica de estudo da calculadora financeira HP 12C, com programação.\nSem vínculo com a Hewlett-Packard.\nFonte do visor: DSEG7 (SIL OFL 1.1).' }) }
@@ -87,6 +88,10 @@ function createWindow() {
 }
 
 ipcMain.on('hp:ready', () => pushSettings());
+ipcMain.on('hp:set-setting', (_e, key, value) => {
+  if (!['hints', 'showRegs', 'comma'].includes(key) || typeof value !== 'boolean') return;
+  settings[key] = value; saveSettings(); buildMenu(); pushSettings();
+});
 ipcMain.handle('hp:copy-text', (_e, text) => { clipboard.writeText(String(text)); return true; });
 ipcMain.handle('hp:paste-text', () => clipboard.readText());
 ipcMain.handle('hp:save-file', async (_e, name, content) => {

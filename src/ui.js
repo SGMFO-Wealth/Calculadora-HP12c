@@ -115,6 +115,9 @@
   }
   function bindKeyboard() {
     window.addEventListener('keydown', e => {
+      if (e.key === 'F2' || (e.key === '?' && !e.ctrlKey && !e.altKey && !e.metaKey)) {
+        e.preventDefault(); if (sheetMode === 'shortcuts') hideHelp(); else showShortcuts(); return;
+      }
       if (!$('help').classList.contains('hidden')) { if (e.key === 'Escape') hideHelp(); return; }
       if (e.ctrlKey || e.metaKey || e.altKey) {
         const k = e.key.toLowerCase();
@@ -205,8 +208,51 @@
 <tr><td>Error 6</td><td>fluxos de caixa (limite/Nj)</td><td>Error 7</td><td>IRR sem solução</td></tr>
 <tr><td>Error 8</td><td>data inválida (1582–4046)</td><td colspan="2">Qualquer tecla apaga a mensagem.</td></tr></table>
 <p style="color:#9a9684;margin-top:14px">Aplicativo independente de estudo, sem vínculo com a Hewlett-Packard. Os resultados seguem as convenções documentadas da HP 12C, mas arredondamentos internos podem diferir na última casa.</p>`;
-  function showHelp() { $('helpBody').innerHTML = HELP; $('help').classList.remove('hidden'); $('helpBody').parentElement.scrollTop = 0; }
-  function hideHelp() { $('help').classList.add('hidden'); }
+  // ---------- folha de atalhos do teclado ----------
+  const SC_NAME = { '␣': 'Espaço', '↵': 'Enter', 'Del': 'Del' };
+  let sheetMode = null, hintsOn = false;
+  function shortcutsHtml() {
+    let g = '<div class="kbmap">';
+    KEYS.forEach((k, idx) => {
+      if (!k) return;
+      const r = Math.floor(idx / 10), c = idx % 10 + 1;
+      const gr = k[0] === 'ENTER' ? (r + 1) + ' / span 2' : (r + 1);
+      const cls = k[0] === 'f' ? ' kbf' : (k[0] === 'g' ? ' kbg' : '');
+      g += '<div class="kb' + cls + '" style="grid-row:' + gr + ';grid-column:' + c + '"><span class="kbl">' + k[1] + '</span><kbd>' + (SC_NAME[k[4]] || k[4]) + '</kbd></div>';
+    });
+    g += '</div>';
+    return '<h1>Atalhos do teclado</h1>' +
+      '<p>Cada tecla da calculadora (em cima) e a tecla do computador que a aciona (embaixo). Funciona com o teclado numérico também.</p>' + g +
+      '<h2>Funções em laranja e azul</h2>' +
+      '<p>Pressione <kbd>f</kbd> ou <kbd>g</kbd> e depois a tecla. Exemplos: <kbd>f</kbd> <kbd>n</kbd> = AMORT, <kbd>g</kbd> <kbd>n</kbd> = 12×, <kbd>g</kbd> <kbd>7</kbd> = BEG, <kbd>f</kbd> <kbd>2</kbd> = duas casas decimais. <kbd>STO</kbd> e <kbd>RCL</kbd> (<kbd>s</kbd>, <kbd>r</kbd>) esperam o número do registrador.</p>' +
+      '<h2>Outros atalhos</h2>' +
+      '<table><tr><th>Tecla</th><th>Ação</th></tr>' +
+      '<tr><td><kbd>Backspace</kbd></td><td>← apaga o último dígito digitado</td></tr>' +
+      '<tr><td><kbd>→</kbd> / <kbd>←</kbd></td><td>SST / BST (segure para ver a linha do programa; ao soltar o SST a linha é executada)</td></tr>' +
+      '<tr><td><kbd>Esc</kbd></td><td>cancela f, g, STO, RCL ou GTO pendentes</td></tr>' +
+      '<tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>Ctrl</kbd>+<kbd>V</kbd></td><td>copia o número do visor / cola um número da área de transferência</td></tr>' +
+      '<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>exporta / importa um programa</td></tr>' +
+      '<tr><td><kbd>F1</kbd></td><td>guia completo da calculadora</td></tr>' +
+      '<tr><td><kbd>F2</kbd> ou <kbd>?</kbd></td><td>abre ou fecha esta tela</td></tr></table>' +
+      '<p style="margin-top:14px"><button class="btn" data-act="hints">' + (hintsOn ? 'Ocultar' : 'Mostrar') + ' as letras nas teclas da calculadora</button>' +
+      '<button class="btn" data-act="guide">Guia completo (F1)</button></p>';
+  }
+  function openSheet(html, mode) {
+    sheetMode = mode; $('helpBody').innerHTML = html; $('help').classList.remove('hidden'); $('helpBody').parentElement.scrollTop = 0;
+  }
+  function showHelp() {
+    openSheet('<p><button class="btn" data-act="shortcuts">Ver só os atalhos do teclado (F2)</button></p>' + HELP, 'guide');
+  }
+  function showShortcuts() { openSheet(shortcutsHtml(), 'shortcuts'); }
+  function hideHelp() { $('help').classList.add('hidden'); sheetMode = null; }
+  function sheetAction(act) {
+    if (act === 'shortcuts') showShortcuts();
+    else if (act === 'guide') showHelp();
+    else if (act === 'hints') {
+      if (api && api.setSetting) api.setSetting('hints', !hintsOn);
+      else applySettings({ hints: !hintsOn, showRegs: !$('regs').classList.contains('hidden') });
+    }
+  }
 
   // ---------- ajuste ao tamanho da janela ----------
   function fit() {
@@ -241,7 +287,8 @@
   function applySettings(s) {
     if (!s) return;
     if (typeof s.comma === 'boolean') eng.opts.comma = s.comma;
-    document.body.classList.toggle('hints', !!s.hints);
+    hintsOn = !!s.hints; document.body.classList.toggle('hints', hintsOn);
+    if (sheetMode === 'shortcuts') showShortcuts();
     $('regs').classList.toggle('hidden', !s.showRegs);
     render(); fit();
   }
@@ -250,6 +297,8 @@
     build(); load(); bindPointer(); bindKeyboard();
     eng.on(render);
     $('helpClose').addEventListener('click', hideHelp);
+    $('helpBody').addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b) sheetAction(b.dataset.act); });
+    $('kbdBtn').addEventListener('click', showShortcuts);
     $('help').addEventListener('pointerdown', e => { if (e.target === $('help')) hideHelp(); });
     window.addEventListener('resize', fit);
     window.addEventListener('beforeunload', save);
@@ -259,6 +308,7 @@
       api.onMenu((cmd, arg) => {
         if (cmd === 'reset') { eng.hardReset(); eng.emit(); toast('Memória zerada'); }
         else if (cmd === 'help') showHelp();
+        else if (cmd === 'shortcuts') showShortcuts();
         else if (cmd === 'copy') copyDisplay();
         else if (cmd === 'paste') pasteNumber();
         else if (cmd === 'export-program') exportProgram();
@@ -269,6 +319,7 @@
       const q = new URLSearchParams(location.search);
       applySettings({ comma: q.get('dot') ? false : true, hints: q.get('hints') === '1', showRegs: q.get('regs') === '1' });
       if (q.get('help')) showHelp();
+      if (q.get('shortcuts')) showShortcuts();
     }
     render(); fit(); requestAnimationFrame(fit);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);

@@ -27,6 +27,9 @@ app.on('browser-window-created', (_e, win) => {
       await js(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'5'}))`);
       await js(`window.dispatchEvent(new KeyboardEvent('keydown',{key:'5',bubbles:true})); window.dispatchEvent(new KeyboardEvent('keyup',{key:'5',bubbles:true}))`);
       results.push(['teclado 5', await js('window.__hp.view().text')]);
+      win.webContents.send('hp:menu', 'shortcuts'); await wait(400); await shot('05-atalhos');
+      results.push(['atalhos: teclas no mini-teclado', await js(`document.querySelectorAll('.kbmap .kb').length`)]);
+      await js(`window.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))`);
       win.webContents.send('hp:menu', 'help'); await wait(400); await shot('03-guia');
       win.webContents.send('hp:menu', 'help'); await js(`document.getElementById('helpClose').click()`);
       win.webContents.send('hp:settings', { comma: false, hints: true, showRegs: true }); await wait(300);
