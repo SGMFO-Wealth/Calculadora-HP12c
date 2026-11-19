@@ -251,6 +251,8 @@
       if (key === 'i') {
         const f = x => { const c = this.tvmCoef(F.n, x); return c.A * F.PV + c.B * F.PMT + F.FV; };
         if (F.n === 0) return this.error(5);
+        const scale = Math.abs(F.PV) + Math.abs(F.PMT) + Math.abs(F.FV) + 1;
+        if (Math.abs(f(0.5)) + Math.abs(f(5)) + Math.abs(f(50)) < 1e-9 * scale) return this.error(5);
         const root = this.findRoot(f, -99.99, 1e6);
         if (root === null) return this.error(5);
         return root;
@@ -443,7 +445,8 @@
       this.commit();
       if (r[0] === 'EEX') { this.compound = !this.compound; return; }
       const x = this.st[0];
-      const apply = (cur) => op === 'add' ? cur + x : op === 'sub' ? cur - x : op === 'mul' ? cur * x : op === 'div' ? (x === 0 ? NaN : cur / x) : x;
+      if (op === 'div' && x === 0) return this.error(0);
+      const apply = (cur) => op === 'add' ? cur + x : op === 'sub' ? cur - x : op === 'mul' ? cur * x : op === 'div' ? cur / x : x;
       if (FIN.includes(r[0])) { const v = apply(this.fin[r[0]]); if (!this.chk(v)) return; this.fin[r[0]] = op ? r12(v) : v; return; }
       const idx = this.regIndex(r); if (idx === null) return;
       const v = apply(this.regs[idx]); if (!this.chk(v, 1)) return; this.regs[idx] = op ? r12(v) : v;
@@ -466,7 +469,7 @@
       if (!isFinite(v)) return 'Error 0';
       const sep = this.opts.comma ? ['.', ','] : [',', '.'];
       const sciStr = (digits) => {
-        const a = Math.abs(v); if (a === 0) return '0' + (digits ? sep[1] + '0'.repeat(digits) : '') + ' 00';
+        const a = Math.abs(v); if (a === 0) return '0' + (digits ? sep[1] + '0'.repeat(digits) : '') + '  00';
         let { d, e } = digitsOf(a, 15); let keep = digits + 1;
         let mant = BigInt(d.slice(0, keep)); if (d[keep] >= '5') mant += 1n;
         let ms = mant.toString(); if (ms.length > keep) { ms = ms.slice(0, keep); e += 1; }
@@ -731,7 +734,7 @@
         if (n === 0) { this.pc = 0; return false; }
         this.pc = n; return true;
       }
-      if (s === 'g,xy') { this.commit(); if (!(this.st[1] <= this.st[0])) this.pc++; return true; }
+      if (s === 'g,xy') { this.commit(); if (!(this.st[0] <= this.st[1])) this.pc++; return true; }
       if (s === 'g,CLx') { this.commit(); if (!(this.st[0] === 0)) this.pc++; return true; }
       if (s === 'g,RS') { this.commit(); this.pause = true; return true; }
       if (s === 'f,RS') return true;

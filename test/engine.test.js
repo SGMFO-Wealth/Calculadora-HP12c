@@ -193,3 +193,42 @@ test('MEM, PREFIX e ON', () => {
   run(c, '3.14159265358979'); c.press('f'); c.keyDown('ENTER'); assert.equal(c.view().text.trim().startsWith('3141592653'), true); c.keyUp();
   c.press('ON'); assert.equal(c.view().text, ''); c.press('ON'); assert.notEqual(c.view().text, '');
 });
+
+// ---------- regressões encontradas em auditoria ----------
+function loadProg(c, lines) { key(c, 'f', 'RS'); lines.forEach(l => key(c, ...l)); key(c, 'f', 'RS'); c.pc = 0; }
+test('programa: g x≤y testa X ≤ Y (execução condicional)', () => {
+  const body = [['g', 'xy'], ['add'], ['1', '0', '0'], ['RS']];
+  const roda = (x, y) => { const c = calc(); loadProg(c, body); c.st = [x, y, 0, 0]; c.lift = true; c.entry = null; c.runSync(); return c.st[1]; };
+  assert.equal(roda(3, 5), 8);   // X=3 ≤ Y=5: executa a soma
+  assert.equal(roda(4, 4), 8);   // igualdade conta como verdadeiro
+  assert.equal(roda(5, 3), 5);   // X=5 ≤ Y=3 é falso: pula a soma
+});
+test('STO ÷ 0 é Error 0 (não estouro de registrador)', () => {
+  assert.equal(run(calc(), '10 sto 1 0 sto / 1').view().text, 'Error 0');
+  assert.equal(run(calc(), '10 sto n 0 sto / n').view().text, 'Error 0');
+  assert.equal(run(calc(), '9.9 eex 9 9 sto 1 9.9 eex 9 9 sto * 1').view().text, 'Error 1');
+});
+test('notação científica de zero tem o mesmo espaçamento dos demais', () => {
+  assert.equal(run(calc(), '0 enter f .').view().text, '0.000000  00');
+});
+test('taxa indeterminada (n=1 BEGIN com PMT=-PV) dá Error 5 em vez de 0', () => {
+  const c = calc(); c.begin = true; c.fin.n = 1; c.fin.PV = 100; c.fin.PMT = -100; c.fin.FV = 0; c.lastFin = true; c.press('i');
+  assert.equal(c.view().text, 'Error 5');
+});
+test('datas: ΔDYS, 30/360 e DATE conferem com o calendário em 200 pares', () => {
+  let seed = 4242; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const rint = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+  const dn = (y, m, d) => Date.UTC(y, m - 1, d) / 864e5;
+  const fm = (y, m, d) => (m + d / 100 + y / 1e6).toFixed(6);
+  const d360 = (a, b) => { let d1 = a.d, d2 = b.d; if (d1 === 31) d1 = 30; if (d2 === 31 && d1 >= 30) d2 = 30; return 360 * (b.y - a.y) + 30 * (b.m - a.m) + (d2 - d1); };
+  const rd = () => { const y = rint(1900, 2100), m = rint(1, 12); return { y, m, d: rint(1, new Date(Date.UTC(y, m, 0)).getUTCDate()) }; };
+  for (let k = 0; k < 200; k++) {
+    const a = rd(), b = rd();
+    const c = run(calc(), `g 5 ${fm(a.y, a.m, a.d)} enter ${fm(b.y, b.m, b.d)} g eex`);
+    assert.equal(c.x, dn(b.y, b.m, b.d) - dn(a.y, a.m, a.d)); assert.equal(c.st[1], d360(a, b));
+    const days = rint(0, 20000), t = new Date((dn(a.y, a.m, a.d) + days) * 864e5);
+    if (t.getUTCFullYear() > 4046) continue;
+    const e = run(calc(), `g 5 ${fm(a.y, a.m, a.d)} enter ${days} g chs`);
+    assert.equal(e.view().text, `${t.getUTCMonth() + 1}-${t.getUTCDate()}-${t.getUTCFullYear()}  ${(t.getUTCDay() + 6) % 7 + 1}`);
+  }
+});
