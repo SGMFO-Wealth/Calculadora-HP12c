@@ -320,7 +320,7 @@
     const stage = $('stage'), calc = $('calc'), regs = $('regs');
     const availW = stage.clientWidth - 20;
     const extra = regs.classList.contains('hidden') ? 0 : regs.offsetHeight + 8;
-    const availH = stage.clientHeight - 20 - extra;
+    const availH = stage.clientHeight - 38 - extra;
     calc.style.width = Math.max(300, availW) + 'px';
     const h = calc.offsetHeight;
     if (h > availH && availH > 100) calc.style.width = Math.max(300, Math.floor(availW * availH / h)) + 'px';
