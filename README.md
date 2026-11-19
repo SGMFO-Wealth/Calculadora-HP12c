@@ -34,7 +34,7 @@ npx electron scripts/make-icon.js         # regenera build/icon.png
 - `test/engine.test.js`: testes com resultados conhecidos da 12C
 
 ## Fidelidade
-Os resultados seguem as convenções documentadas da HP 12C, mas o projeto foi feito sem uma calculadora física para comparação. Alguns detalhes podem diferir do aparelho real: a ordem de certos resultados na pilha (PRICE, INT), o número de casas da notação científica e os códigos de algumas mensagens de erro. Correções com exemplos do aparelho real são muito bem-vindas (abra uma issue).
+Os resultados seguem as convenções documentadas da HP 12C, mas alguns detalhes podem diferir do aparelho real: a ordem de certos resultados na pilha (PRICE, INT), o número de casas da notação científica e os códigos de algumas mensagens de erro. Correções com exemplos do aparelho real são muito bem-vindas (abra uma issue).
 
 ## Autor
 **Yaman Alencar** ([@yaman-alencar](https://github.com/yaman-alencar)). Contribuições e sugestões são bem-vindas pelas [issues](https://github.com/yaman-alencar/Calculadora-HP12c/issues).
